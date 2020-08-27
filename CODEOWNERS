@@ -29,6 +29,9 @@
 # Experiments library
 /components/service/experiments/ @mozilla-mobile/telemetry
 
+# Nimbus library
+/components/service/nimbus @mozilla-mobile/telemetry @mozilla-mobile/ast
+
 # Release Engineering pipeline
 /.cron.yml /@mozilla-mobile/releng @mozilla-mobile/act
 /automation/ @mozilla-mobile/releng @mozilla-mobile/act
