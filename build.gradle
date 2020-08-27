@@ -6,6 +6,7 @@ import static org.gradle.api.tasks.testing.TestResult.ResultType
 
 buildscript {
     repositories {
+        mavenLocal()
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
@@ -48,6 +49,7 @@ plugins {
 
 allprojects {
     repositories {
+        mavenLocal()
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"

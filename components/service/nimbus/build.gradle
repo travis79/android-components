@@ -30,7 +30,7 @@ android {
 dependencies {
     implementation Dependencies.kotlin_stdlib
     implementation Dependencies.kotlin_coroutines
-
+    api Dependencies.uniffi_nimbus
     implementation project(':service-glean')
     implementation project(':support-ktx')
     implementation project(':support-base')

@@ -7,6 +7,8 @@ package mozilla.components.service.nimubs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import mozilla.components.support.base.coroutines.Dispatchers
+import uniffi.nimbus.AppContext
+import uniffi.nimbus.Experiments
 
 /**
  * This is the main experiments API, which is exposed through the global [Nimbus] object.
@@ -15,10 +17,21 @@ open class NimbusInternalAPI internal constructor() {
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Cached)
 
     fun initialize(onExperimentUpdated: (() -> Unit)? = null) {
+        // Set the name of the native library
+        // this should probably be moved elsewhere
+        System.setProperty("uniffi.component.nimbus.libraryOverride", "nimbus")
         // Do initialization off of the main thread
         scope.launch {
             // TODO build Nimbus AppContext
+            // This is an example of how it might be done
+            val context = AppContext(null,
+                    null,
+                    null ,
+                    null,
+                    null, null ,null, null , null, null, null)
             // TODO init Nimbus
+            // this is an example of how it might be done
+            val experiments = Experiments("messaging-experiments", context, "", null)
             // TODO wait for experiments to update
             // TODO get experiments
             onExperimentUpdated?.invoke(/* TODO call with experiments list */)

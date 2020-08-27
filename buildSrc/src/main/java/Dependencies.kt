@@ -28,6 +28,7 @@ object Versions {
     const val leakcanary = "2.4"
 
     const val mozilla_appservices = "61.0.13"
+    const val uniffi_nimbus = "7.0"
 
     const val mozilla_glean = "32.1.1"
 
@@ -131,6 +132,9 @@ object Dependencies {
     const val tools_detekt_test = "io.gitlab.arturbosch.detekt:detekt-test:${Versions.detekt}"
 
     const val mozilla_fxa = "org.mozilla.appservices:fxaclient:${Versions.mozilla_appservices}"
+    //this should probably be `org.mozilla.uniffi.nimbus` or something like that
+    // but for demonstration purposes
+    const val uniffi_nimbus = "uniffi:nimbus:${Versions.uniffi_nimbus}"
 
     const val mozilla_glean_forUnitTests = "org.mozilla.telemetry:glean-forUnitTests:${Versions.mozilla_glean}"
 
