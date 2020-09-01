@@ -6,6 +6,9 @@ import static org.gradle.api.tasks.testing.TestResult.ResultType
 
 buildscript {
     repositories {
+        // DO NOT MERGE, this PR requires nimbus-sdk to be published to Mozilla Maven and then this
+        // won't be necessary.
+        mavenLocal()
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
@@ -48,6 +51,9 @@ plugins {
 
 allprojects {
     repositories {
+        // DO NOT MERGE, this PR requires nimbus-sdk to be published to Mozilla Maven and then this
+        // won't be necessary.
+        mavenLocal()
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
