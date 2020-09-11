@@ -135,6 +135,7 @@ object Dependencies {
     // this should probably be `org.mozilla.uniffi.nimbus` or something like that
     // but for demonstration purposes
     const val uniffi_nimbus = "uniffi:nimbus:${Versions.uniffi_nimbus}"
+    const val uniffi_nimbus_forUnitTests = "uniffi:nimbus-forUnitTests:${Versions.uniffi_nimbus}"
 
     const val mozilla_glean_forUnitTests = "org.mozilla.telemetry:glean-forUnitTests:${Versions.mozilla_glean}"
 

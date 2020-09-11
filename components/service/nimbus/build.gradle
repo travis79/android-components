@@ -35,6 +35,7 @@ dependencies {
     implementation project(':service-glean')
     implementation project(':support-base')
 
+    testImplementation Dependencies.uniffi_nimbus_forUnitTests
     testImplementation Dependencies.androidx_test_core
     testImplementation Dependencies.androidx_test_junit
 }
