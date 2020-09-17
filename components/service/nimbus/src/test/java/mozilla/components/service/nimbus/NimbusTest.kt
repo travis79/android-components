@@ -7,7 +7,12 @@ package mozilla.components.service.nimbus
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import mozilla.components.service.nimbus.NimbusInternalAPI.Companion.getLanguageFromLocale
 import mozilla.components.service.nimbus.NimbusInternalAPI.Companion.getLocaleTag
 import org.junit.Assert.assertEquals
@@ -25,15 +30,22 @@ class NimbusTest {
 
     @Test
     fun `test Nimbus initialize`() {
-        runBlocking {
+        runBlocking { withTimeout(3000L) { suspendCancellableCoroutine<Unit> { cont ->
             try {
                 Nimbus.initialize(context) { experiments ->
-                    assertTrue(experiments.count() > 0)
+                    try {
+                        // Uncomment this to test awaiting of the callback
+                        // assert(false)
+                        assertTrue(experiments.count() > 0)
+                        cont.resume(Unit)
+                    } catch (e: Throwable) {
+                        cont.resumeWithException(e)
+                    }
                 }
-            } catch (e: UnsatisfiedLinkError) {
-                assert(false)
+            } catch (e: Throwable) {
+                cont.resumeWithException(e)
             }
-        }
+        }}}
     }
 
     @Test
