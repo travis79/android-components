@@ -13,20 +13,15 @@ import mozilla.components.service.glean.Glean
 import mozilla.components.service.glean.config.Configuration
 import mozilla.components.service.glean.net.ConceptFetchHttpUploader
 import mozilla.components.service.glean.testing.GleanTestRule
-import mozilla.components.service.nimbus.NimbusInternalAPI.Companion.getLanguageFromLocale
-import mozilla.components.service.nimbus.NimbusInternalAPI.Companion.getLocaleTag
 import mozilla.components.support.test.any
 import mozilla.components.support.test.mock
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import uniffi.nimbus.EnrolledExperiment
-import java.util.Locale
 
 @RunWith(AndroidJUnit4::class)
 class NimbusTest {
@@ -35,39 +30,6 @@ class NimbusTest {
 
     @get:Rule
     val gleanRule = GleanTestRule(context)
-
-    @Test
-    fun `getLanguageTag() reports the tag for the default locale`() {
-        val defaultLanguageTag = getLocaleTag()
-
-        assertNotNull(defaultLanguageTag)
-        assertFalse(defaultLanguageTag.isEmpty())
-        assertEquals("en-US", defaultLanguageTag)
-    }
-
-    @Test
-    fun `getLanguageTag reports the correct tag for a non-default language`() {
-        val defaultLocale = Locale.getDefault()
-
-        try {
-            Locale.setDefault(Locale("fy", "NL"))
-
-            val languageTag = getLocaleTag()
-
-            assertNotNull(languageTag)
-            assertFalse(languageTag.isEmpty())
-            assertEquals("fy-NL", languageTag)
-        } finally {
-            Locale.setDefault(defaultLocale)
-        }
-    }
-
-    @Test
-    fun `getLanguage reports the modern translation for some languages`() {
-        assertEquals("he", getLanguageFromLocale(Locale("iw", "IL")))
-        assertEquals("id", getLanguageFromLocale(Locale("in", "ID")))
-        assertEquals("yi", getLanguageFromLocale(Locale("ji", "ID")))
-    }
 
     @Test
     fun `recordExperimentTelemetry correctly records the experiment and branch`() {
@@ -91,7 +53,7 @@ class NimbusTest {
             userFacingDescription = "A test experiment for testing experiments",
             userFacingName = "Test Experiment"))
 
-        Nimbus.recordExperimentTelemetry(experiments = enrolledExperiments)
+        Nimbus.shared.recordExperimentTelemetry(experiments = enrolledExperiments)
         assertTrue(Glean.testIsExperimentActive("test-experiment"))
         val experimentData = Glean.testGetExperimentData("test-experiment")
         assertEquals("test-branch", experimentData.branch)

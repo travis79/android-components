@@ -33,6 +33,7 @@ dependencies {
     implementation Dependencies.kotlin_stdlib
     implementation Dependencies.kotlin_coroutines
     implementation project(':support-base')
+    implementation project(':support-locale')
 
     compileOnly project(":service-glean")
     testImplementation project(":service-glean")
