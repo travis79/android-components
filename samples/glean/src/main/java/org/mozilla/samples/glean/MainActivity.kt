@@ -10,10 +10,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import mozilla.components.service.nimbus.Nimbus
+import org.mozilla.experiments.nimbus.EnrolledExperiment
 import org.mozilla.samples.glean.GleanMetrics.Test
 import org.mozilla.samples.glean.GleanMetrics.BrowserEngagement
 import org.mozilla.samples.glean.library.SamplesGleanLibrary
-import uniffi.nimbus.EnrolledExperiment
+
 
 /**
  * Main Activity of the glean-sample-app

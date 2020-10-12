@@ -32,7 +32,7 @@ object Versions {
 
     // Temporary revision pointing to the prototype megazord that includes nimbus, replace with
     // actual release before merging!!!
-    const val mozilla_appservices = "0.64.5-nimbus"
+    const val mozilla_appservices = "0.64.6-nimbus"
 
     const val mozilla_glean = "33.0.4"
 

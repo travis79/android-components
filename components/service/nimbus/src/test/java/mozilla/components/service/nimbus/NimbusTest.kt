@@ -21,7 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
-import uniffi.nimbus.EnrolledExperiment
+import org.mozilla.experiments.nimbus.EnrolledExperiment
 
 @RunWith(AndroidJUnit4::class)
 class NimbusTest {

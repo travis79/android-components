@@ -14,10 +14,11 @@ import mozilla.components.service.glean.Glean
 import mozilla.components.support.base.coroutines.Dispatchers
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.locale.getLocaleTag
-import uniffi.nimbus.AppContext
-import uniffi.nimbus.EnrolledExperiment
-import uniffi.nimbus.ExperimentConfig
-import uniffi.nimbus.NimbusClient
+import org.mozilla.experiments.nimbus.AppContext
+import org.mozilla.experiments.nimbus.AvailableRandomizationUnits
+import org.mozilla.experiments.nimbus.EnrolledExperiment
+import org.mozilla.experiments.nimbus.RemoteSettingsConfig
+import org.mozilla.experiments.nimbus.NimbusClient
 import java.io.File
 import java.util.Locale
 
@@ -82,11 +83,11 @@ open class Nimbus internal constructor() {
                 EXPERIMENT_COLLECTION_NAME,
                 experimentContext,
                 dataDir.path,
-                ExperimentConfig(
+                RemoteSettingsConfig(
                     serverUrl = context.resources.getString(R.string.nimbus_staging_endpoint),
-                    uuid = null,
                     bucketName = null
-                )
+                ),
+                AvailableRandomizationUnits(clientId = null)
             )
 
             // Get experiments
