@@ -15,7 +15,6 @@ import org.mozilla.samples.glean.GleanMetrics.Test
 import org.mozilla.samples.glean.GleanMetrics.BrowserEngagement
 import org.mozilla.samples.glean.library.SamplesGleanLibrary
 
-
 /**
  * Main Activity of the glean-sample-app
  */
