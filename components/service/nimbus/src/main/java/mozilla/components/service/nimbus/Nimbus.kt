@@ -84,7 +84,7 @@ open class Nimbus internal constructor() {
                 experimentContext,
                 dataDir.path,
                 RemoteSettingsConfig(
-                    serverUrl = context.resources.getString(R.string.nimbus_staging_endpoint),
+                    serverUrl = context.resources.getString(R.string.nimbus_default_endpoint),
                     bucketName = null
                 ),
                 AvailableRandomizationUnits(clientId = null)
