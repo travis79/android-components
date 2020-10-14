@@ -103,7 +103,7 @@ open class MainActivity : AppCompatActivity(), ExperimentUpdateReceiver.Experime
                 textViewExperimentStatus.setBackgroundColor(color)
                 textViewExperimentStatus.text = getString(
                     R.string.experiment_active_branch,
-                    "Experiment Branch: $color")
+                    "Experiment Branch: ${Nimbus.shared.getExperimentBranch("test-color")}")
             }
         }
     }
