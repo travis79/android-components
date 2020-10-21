@@ -53,7 +53,7 @@ class NimbusTest {
             userFacingDescription = "A test experiment for testing experiments",
             userFacingName = "Test Experiment"))
 
-        Nimbus.shared.recordExperimentTelemetry(experiments = enrolledExperiments)
+        Nimbus.recordExperimentTelemetry(experiments = enrolledExperiments)
         assertTrue(Glean.testIsExperimentActive("test-experiment"))
         val experimentData = Glean.testGetExperimentData("test-experiment")
         assertEquals("test-branch", experimentData.branch)

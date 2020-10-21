@@ -44,7 +44,7 @@ class GleanApplication : Application() {
         RustLog.enable()
         RustHttpConfig.setClient(lazy { HttpURLConnectionClient() })
         Log.addSink(AndroidLogSink())
-        Nimbus.shared.initialize(this) {
+        Nimbus.init(this) {
             val intent = Intent()
             intent.action = "org.mozilla.samples.glean.experiments.updated"
             sendBroadcast(intent)

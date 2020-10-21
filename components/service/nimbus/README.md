@@ -96,7 +96,7 @@ For testing purposes, create a collection with an id of `nimbus-mobile-experimen
     },
     "endDate": {
       "$id": "#/properties/endDate",
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date-time",
       "title": "End Date",
       "description": "This is the date that the experiment will end.",
@@ -175,7 +175,7 @@ For testing purposes, create a collection with an id of `nimbus-mobile-experimen
     },
     "startDate": {
       "$id": "#/properties/startDate",
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date-time",
       "title": "Start Date",
       "description": "The date that the experiment will start",

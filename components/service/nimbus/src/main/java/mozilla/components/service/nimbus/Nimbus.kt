@@ -8,10 +8,12 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.VisibleForTesting
+import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import mozilla.components.service.glean.Glean
-import mozilla.components.support.base.coroutines.Dispatchers
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.locale.getLocaleTag
 import org.mozilla.experiments.nimbus.AppContext
@@ -21,31 +23,63 @@ import org.mozilla.experiments.nimbus.RemoteSettingsConfig
 import org.mozilla.experiments.nimbus.NimbusClient
 import java.io.File
 import java.util.Locale
+import java.util.concurrent.Executors
 
 /**
- * This is the main experiments API, which is exposed through the global [Nimbus.shared] object.
+ * This is the main experiments API, which is exposed through the global [Nimbus] object.
  */
-open class Nimbus internal constructor() {
-    companion object {
-        internal const val LOG_TAG = "service/Nimbus"
-        private const val EXPERIMENT_COLLECTION_NAME = "nimbus-mobile-experiments"
-        internal const val NIMBUS_DATA_DIR: String = "nimbus_data"
+internal interface NimbusApi {
+    /**
+     * Get the list of currently enrolled experiments
+     *
+     * @return A list of [EnrolledExperiment]s
+     */
+    fun getActiveExperiments(): List<EnrolledExperiment>
 
-        val shared by lazy { Nimbus() }
-    }
+    /**
+     * Get the currently enrolled branch for the given experiment
+     *
+     * @param experimentId The string experiment-id or "slug" for which to retrieve the branch
+     *
+     * @return A String representing the branch-id or "slug"
+     */
+    fun getExperimentBranch(experimentId: String): String?
 
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Cached)
+    /**
+     * Refreshes the experiments from the endpoint.
+     */
+    fun updateExperiments()
+
+    /**
+     * Opt out of a specific experiment
+     *
+     * @param experimentId The string experiment-id or "slug" for which to opt out of
+     */
+    fun optOut(experimentId: String)
+
+    /**
+     * Opt out of all experiments
+     */
+    fun optOutAll()
+}
+
+/**
+ * A singleton implementation of the [NimbusApi] interface backed by the Nimbus SDK.
+ */
+object Nimbus : NimbusApi {
+    private const val LOG_TAG = "service/Nimbus"
+    private const val EXPERIMENT_COLLECTION_NAME = "nimbus-mobile-experiments"
+    private const val NIMBUS_DATA_DIR: String = "nimbus_data"
+
+    // Using a single threaded executor here to enforce synchronization where needed.
+    private val scope: CoroutineScope =
+        CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
 
     private lateinit var nimbus: NimbusClient
     private lateinit var dataDir: File
     private var onExperimentUpdated: ((List<EnrolledExperiment>) -> Unit)? = null
 
-    var isInitialized = false
-
-    init {
-        // Set the name of the native library
-        System.setProperty("uniffi.component.nimbus.libraryOverride", "megazord")
-    }
+    private var isInitialized = false
 
     /**
      * Initialize the Nimbus SDK library.
@@ -64,10 +98,13 @@ open class Nimbus internal constructor() {
      * callback will be supplied with the list of active experiments (if any) for which the client
      * is enrolled.
      */
-    fun initialize(
+    fun init(
         context: Context,
         onExperimentUpdated: ((activeExperiments: List<EnrolledExperiment>) -> Unit)? = null
     ) {
+        // Set the name of the native library
+        System.setProperty("uniffi.component.nimbus.libraryOverride", "megazord")
+
         this.onExperimentUpdated = onExperimentUpdated
 
         // Do initialization off of the main thread
@@ -104,43 +141,48 @@ open class Nimbus internal constructor() {
         }
     }
 
-    /**
-     * Get the list of currently enrolled experiments
-     *
-     * @return A list of [EnrolledExperiment]s
-     */
-    fun getActiveExperiments(): List<EnrolledExperiment> =
+    override fun getActiveExperiments(): List<EnrolledExperiment> =
         if (isInitialized) { nimbus.getActiveExperiments() } else { emptyList() }
 
-    /**
-     * Get the currently enrolled branch for the given experiment
-     *
-     * @param experimentId The string experiment-id or "slug" for which to retrieve the branch
-     *
-     * @return A String representing the branch-id or "slug"
-     */
-    fun getExperimentBranch(experimentId: String): String? =
+    override fun getExperimentBranch(experimentId: String): String? =
         if (isInitialized) { nimbus.getExperimentBranch(experimentId) } else { null }
 
+    override fun updateExperiments() {
+        if (!isInitialized) return
+        nimbus.updateExperiments()
+        onExperimentUpdated?.invoke(nimbus.getActiveExperiments())
+    }
+
+    override fun optOut(experimentId: String) {
+        if (!isInitialized) return
+        nimbus.optOut(experimentId)
+    }
+
+    override fun optOutAll() {
+        if (!isInitialized) return
+        nimbus.optOutAll()
+    }
+
+    // This function shouldn't be exposed to the public API, but is meant for testing purposes to
+    // force an experiment/branch enrollment.
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    internal fun optInWithBranch(experiment: String, branch: String) {
+        if (!isInitialized) return
+        nimbus.optInWithBranch(experiment, branch)
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun recordExperimentTelemetry(experiments: List<EnrolledExperiment>) {
         // Call Glean.setExperimentActive() for each active experiment.
         experiments.forEach {
             // For now, we will just record the experiment id and the branch id. Once we can call
-            // Glean from the Nimbus-SDK Rust core, we will also record the targeting parameters
-            // and the bucketing parameters.
+            // Glean from Rust, this will move to the nimbus-sdk Rust core.
             Glean.setExperimentActive(it.slug, it.branchSlug)
         }
-
-        // Note, we cannot call setExperimentInactive unless we track the state of the
-        // experiments in this component and persist the info, since Glean doesn't persist
-        // experiment info, we would only have to do this in the case where we unenrolled from
-        // an experiment during application runtime, and since we currently only check for
-        // experiments during init, we don't currently have a case where we could detect this,
-        // but since Glean doesn't persist this info either, simply not 'enrolling' the
-        // experiment in Glean will be sufficient to show as 'unenrolled'.
     }
 
-    private fun buildExperimentContext(context: Context): AppContext {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun buildExperimentContext(context: Context): AppContext {
         val packageInfo: PackageInfo? = try {
             context.packageManager.getPackageInfo(
                 context.packageName, 0
@@ -153,11 +195,10 @@ open class Nimbus internal constructor() {
             null
         }
 
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            AppContext(
+        return AppContext(
                 appId = context.packageName,
                 androidSdkVersion = Build.VERSION.SDK_INT.toString(),
-                appBuild = packageInfo?.longVersionCode.toString(),
+                appBuild = packageInfo?.let { PackageInfoCompat.getLongVersionCode(it).toString() },
                 appVersion = packageInfo?.versionName,
                 architecture = Build.SUPPORTED_ABIS[0],
                 debugTag = null,
@@ -166,21 +207,5 @@ open class Nimbus internal constructor() {
                 locale = Locale.getDefault().getLocaleTag(),
                 os = "Android",
                 osVersion = Build.VERSION.RELEASE)
-        } else {
-            // ("VERSION.SDK_INT < P")
-            @Suppress("DEPRECATION")
-            AppContext(
-                appId = context.packageName,
-                androidSdkVersion = Build.VERSION.SDK_INT.toString(),
-                appBuild = packageInfo?.versionCode.toString(),
-                appVersion = packageInfo?.versionName,
-                architecture = Build.SUPPORTED_ABIS[0],
-                debugTag = null,
-                deviceManufacturer = Build.MANUFACTURER,
-                deviceModel = Build.MODEL,
-                locale = Locale.getDefault().getLocaleTag(),
-                os = "Android",
-                osVersion = Build.VERSION.RELEASE)
-        }
     }
 }

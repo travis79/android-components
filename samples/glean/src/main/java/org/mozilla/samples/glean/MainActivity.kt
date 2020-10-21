@@ -87,10 +87,10 @@ open class MainActivity : AppCompatActivity(), ExperimentUpdateReceiver.Experime
         textViewExperimentStatus.setBackgroundColor(Color.WHITE)
         textViewExperimentStatus.text = getString(R.string.experiment_not_active)
 
-        activeExperiments = Nimbus.shared.getActiveExperiments()
+        activeExperiments = Nimbus.getActiveExperiments()
 
         if (activeExperiments.any { it.slug == "test-color" }) {
-            val color = when (Nimbus.shared.getExperimentBranch("test-color")) {
+            val color = when (Nimbus.getExperimentBranch("test-color")) {
                 "blue" -> Color.BLUE
                 "red" -> Color.RED
                 "control" -> Color.DKGRAY
@@ -102,7 +102,7 @@ open class MainActivity : AppCompatActivity(), ExperimentUpdateReceiver.Experime
                 textViewExperimentStatus.setBackgroundColor(color)
                 textViewExperimentStatus.text = getString(
                     R.string.experiment_active_branch,
-                    "Experiment Branch: ${Nimbus.shared.getExperimentBranch("test-color")}")
+                    "Experiment Branch: ${Nimbus.getExperimentBranch("test-color")}")
             }
         }
     }
