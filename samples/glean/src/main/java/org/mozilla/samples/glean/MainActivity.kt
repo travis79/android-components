@@ -63,6 +63,21 @@ open class MainActivity : AppCompatActivity(), ExperimentUpdateReceiver.Experime
 
         // The following is not relevant to the Glean SDK, but to the Nimbus experiments library.
         // Set up the ExperimentUpdateReceiver to receive experiment updated Intents.
+        setupNimbusExperiments()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(experimentUpdateReceiver)
+    }
+
+    /** Begin Nimbus component specific functions */
+
+    /**
+     * This sets up the update receiver and sets the onClickListener for the "Update Experiments"
+     * button. This is not relevant to the Glean SDK, but to the Nimbus experiments library.
+     */
+    private fun setupNimbusExperiments() {
         experimentUpdateReceiver = ExperimentUpdateReceiver(this)
         val filter = IntentFilter()
         filter.addAction("org.mozilla.samples.glean.experiments.updated")
@@ -74,14 +89,9 @@ open class MainActivity : AppCompatActivity(), ExperimentUpdateReceiver.Experime
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(experimentUpdateReceiver)
-    }
-
     /**
      * This function will be called by the ExperimentUpdateListener interface when the experiments
-     * are updated.  This is not relevant to the Glean SDK, but to the Nimbus experiments library.
+     * are updated. This is not relevant to the Glean SDK, but to the Nimbus experiments library.
      */
     override fun onExperimentsUpdated() {
         textViewExperimentStatus.setBackgroundColor(Color.WHITE)
@@ -106,4 +116,6 @@ open class MainActivity : AppCompatActivity(), ExperimentUpdateReceiver.Experime
             }
         }
     }
+
+    /** End Nimbus component functions */
 }

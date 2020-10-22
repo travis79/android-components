@@ -38,17 +38,9 @@ class GleanApplication : Application() {
         val config = Configuration(httpClient = httpClient)
         Glean.initialize(applicationContext, uploadEnabled = true, configuration = config)
 
-        // Initialize the Nimbus experiments library and pass in the callback that will generate a
-        // broadcast Intent to signal the application that experiments have been updated. This is
-        // only relevant to the Nimbus library, aside from recording the experiment in Glean.
-        RustLog.enable()
-        RustHttpConfig.setClient(lazy { HttpURLConnectionClient() })
-        Log.addSink(AndroidLogSink())
-        Nimbus.init(this) {
-            val intent = Intent()
-            intent.action = "org.mozilla.samples.glean.experiments.updated"
-            sendBroadcast(intent)
-        }
+        /** Begin Nimbus component specific code. Note: this is not relevant to Glean */
+        initNimbus()
+        /** End Nimbus specific code. */
 
         Test.timespan.start()
 
@@ -56,5 +48,20 @@ class GleanApplication : Application() {
 
         // Set a sample value for a metric.
         Basic.os.set("Android")
+    }
+
+    /**
+     * Initialize the Nimbus experiments library and pass in the callback that will generate a
+     * broadcast Intent to signal the application that experiments have been updated. This is
+     * only relevant to the Nimbus library, aside from recording the experiment in Glean.
+     */
+    private fun initNimbus() {
+        RustLog.enable()
+        RustHttpConfig.setClient(lazy { HttpURLConnectionClient() })
+        Nimbus.init(this) {
+            val intent = Intent()
+            intent.action = "org.mozilla.samples.glean.experiments.updated"
+            sendBroadcast(intent)
+        }
     }
 }
