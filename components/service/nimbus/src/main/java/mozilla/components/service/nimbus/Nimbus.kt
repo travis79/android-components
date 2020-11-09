@@ -68,6 +68,7 @@ internal interface NimbusApi {
  */
 object Nimbus : NimbusApi {
     private const val LOG_TAG = "service/Nimbus"
+    private const val EXPERIMENT_BUCKET_NAME = "main"
     private const val EXPERIMENT_COLLECTION_NAME = "nimbus-mobile-experiments"
     private const val NIMBUS_DATA_DIR: String = "nimbus_data"
 
@@ -102,8 +103,12 @@ object Nimbus : NimbusApi {
         context: Context,
         onExperimentUpdated: ((activeExperiments: List<EnrolledExperiment>) -> Unit)? = null
     ) {
-        // Set the name of the native library
-        System.setProperty("uniffi.component.nimbus.libraryOverride", "megazord")
+        // Set the name of the native library so that we use
+        // the appservices megazord for compiled code.
+        System.setProperty(
+            "uniffi.component.nimbus.libraryOverride",
+            System.getProperty("mozilla.appservices.megazord.library", "megazord")
+        )
 
         this.onExperimentUpdated = onExperimentUpdated
 
@@ -117,14 +122,16 @@ object Nimbus : NimbusApi {
 
             // Initialize Nimbus
             nimbus = NimbusClient(
-                EXPERIMENT_COLLECTION_NAME,
                 experimentContext,
                 dataDir.path,
                 RemoteSettingsConfig(
                     serverUrl = context.resources.getString(R.string.nimbus_default_endpoint),
-                    bucketName = null
+                    bucketName = EXPERIMENT_BUCKET_NAME,
+                    collectionName = EXPERIMENT_COLLECTION_NAME,
                 ),
-                AvailableRandomizationUnits(clientId = null)
+                // The "dummy" field here is required for obscure reasons when generating code on desktop,
+                // so we just automatically set it to a dummy value.
+                AvailableRandomizationUnits(clientId = null, dummy = 0)
             )
 
             // Get experiments
@@ -160,7 +167,8 @@ object Nimbus : NimbusApi {
 
     override fun optOutAll() {
         if (!isInitialized) return
-        nimbus.optOutAll()
+        //nimbus.optOutAll()
+        throw RuntimeException("global opt-out hasn't landed in nimbus yet")
     }
 
     // This function shouldn't be exposed to the public API, but is meant for testing purposes to

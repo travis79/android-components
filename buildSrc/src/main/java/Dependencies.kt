@@ -32,7 +32,7 @@ object Versions {
 
     // Temporary revision pointing to the prototype megazord that includes nimbus, replace with
     // actual release before merging!!!
-    const val mozilla_appservices = "0.64.6-nimbus"
+    const val mozilla_appservices = "67.0.0-nimbuzord"
 
     const val mozilla_glean = "33.0.4"
 
@@ -137,7 +137,7 @@ object Dependencies {
 
     const val mozilla_fxa = "org.mozilla.appservices:fxaclient:${Versions.mozilla_appservices}"
 
-    const val mozilla_nimbus = "org.mozilla.appservices:full-megazord:${Versions.mozilla_appservices}"
+    const val mozilla_nimbus = "org.mozilla.appservices:nimbus:${Versions.mozilla_appservices}"
 
     const val mozilla_glean_forUnitTests = "org.mozilla.telemetry:glean-forUnitTests:${Versions.mozilla_glean}"
 
